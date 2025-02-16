@@ -24,7 +24,7 @@ print(RAW_TRAINING_DATA)
 XOR_Labels = RAW_TRAINING_DATA[:, :, 0] ^ RAW_TRAINING_DATA[:, :, 1] #compare first with second column, deconstructs
 
 #https://docs.jax.dev/en/latest/_autosummary/jax.nn.one_hot.html
-LABEL = jax.nn.one_hot(XOR_Labels, 2)
+LABELS = jax.nn.one_hot(XOR_Labels, 2)
 
 
 # Initializing neural network parameters (weights)
