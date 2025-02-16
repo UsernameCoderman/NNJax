@@ -15,36 +15,17 @@ NUM_TRAIN_STEPS = 1000  # Total number of training steps (iterations over datase
 
 # Generate raw training data
 
-RAW_TRAINING_DATA = np.random.randint(2, size=(NUM_TRAIN_STEPS, BATCH_SIZE, 1))
+#https://numpy.org/doc/2.1/reference/random/generated/numpy.random.randint.html
+RAW_TRAINING_DATA = np.random.randint(2, size=(NUM_TRAIN_STEPS, BATCH_SIZE, 2)) # size = how many arrays, how many in each array, what dimension
 print(RAW_TRAINING_DATA)
-###
-# Generates a 3D NumPy array of shape (1000, 5, 1) filled with random integers between 0 and 254.
-# Each value represents an 8-bit grayscale intensity (1-byte integer).
-# - NUM_TRAIN_STEPS (1000): Number of training steps (i.e., different batches).
-# - BATCH_SIZE (5): Number of examples in each batch.
-# - Last dimension (1): Holds a single integer per sample, making it easier to reshape later.
-
-# Convert raw training data into binary representation (8-bit format)
-
-#TRAINING_DATA = np.unpackbits(RAW_TRAINING_DATA.astype(np.uint8), axis=-1)
-# - Converts each 8-bit integer into a binary array of shape (NUM_TRAIN_STEPS, BATCH_SIZE, 8).
-# - Example: 5 → [0, 0, 0, 0, 0, 1, 0, 1] (8-bit binary).
-# - This transformation allows the neural network to process the data as binary inputs.
-
-# Create one-hot encoded labels for even/odd classification
 
 # 16/02/25 https://numpy.org/doc/2.2/reference/generated/numpy.bitwise_xor.html
 
-xor_labels = RAW_TRAINING_DATA[:, :, 0] ^ RAW_TRAINING_DATA[:, :, 1]  # XOR first bit with second bit
+XOR_Labels = RAW_TRAINING_DATA[:, :, 0] ^ RAW_TRAINING_DATA[:, :, 1] #compare first with second column, deconstructs
 
-#
-LABEL =
+#https://docs.jax.dev/en/latest/_autosummary/jax.nn.one_hot.html
+LABEL = jax.nn.one_hot(XOR_Labels, 2)
 
-
-#LABELS = jax.nn.one_hot(RAW_TRAINING_DATA % 2, 2).astype(jnp.float32).reshape(NUM_TRAIN_STEPS, BATCH_SIZE, 2)
-# - Computes remainder when dividing each number by 2 (RAW_TRAINING_DATA % 2).
-# - Converts 0 (even) to [1, 0] and 1 (odd) to [0, 1] using one-hot encoding.
-# - Reshapes the labels into (1000, 5, 2), ensuring compatibility with the model.
 
 # Initializing neural network parameters (weights)
 
@@ -130,7 +111,7 @@ def fit(params: optax.Params, optimizer: optax.GradientTransformation) -> optax.
         return params, opt_state, loss_value  # Return updated parameters and loss.
 
     # Training loop
-    for i, (batch, labels) in enumerate(zip(TRAINING_DATA, LABELS)):
+    for i, (batch, labels) in enumerate(zip(RAW_TRAINING_DATA, LABELS)):
         params, opt_state, loss_value = step(params, opt_state, batch, labels)
         # - Runs the `step` function to perform one gradient update.
 
