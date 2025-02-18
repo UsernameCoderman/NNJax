@@ -31,7 +31,7 @@ LABELS = jax.nn.one_hot(XOR_Labels, 2)
 
 initial_params = {
     'hidden': jax.random.normal(shape=[2, 32], key=jax.random.PRNGKey(0)),
-    # - Initializes random weights for the hidden layer (8 inputs → 32 neurons).
+    # - Initializes random weights for the hidden layer (2 inputs → 32 neurons).
     # - Uses PRNGKey(0) for reproducibility.
 
     'output': jax.random.normal(shape=[32, 2], key=jax.random.PRNGKey(1))
@@ -50,8 +50,8 @@ def net(inputX: jnp.ndarray, paramWeights: optax.Params) -> jnp.ndarray:
     Returns:
         Output tensor (logits before softmax).
     """
-    inputX = jnp.dot(inputX, paramWeights['hidden'])  # Perform matrix multiplication with hidden layer weights.
-    inputX = jax.nn.relu(inputX)  # Apply ReLU activation function (introduces non-linearity).
+    inputX = jnp.dot(inputX, paramWeights['hidden'])  # Perform matrix multiplication with hidden layer weights.  https://docs.jax.dev/en/latest/_autosummary/jax.numpy.dot.html 18/02/
+    inputX = jax.nn.sigmoid(inputX)  #https://docs.jax.dev/en/latest/_autosummary/jax.nn.sigmoid.html
     inputX = jnp.dot(inputX, paramWeights['output'])  # Compute final layer logits (before activation).
     return inputX  # Output shape: (batch_size, 2) - raw scores for the even/odd classes.
 
