@@ -27,10 +27,10 @@ XOR_Labels = RAW_TRAINING_DATA[:, :, 0] ^ RAW_TRAINING_DATA[:, :, 1] #compare fi
 LABELS = jax.nn.one_hot(XOR_Labels, 2)
 
 
-# Initializing neural network parameters (weights)
+# Initializing neural network parameters (weights) https://docs.jax.dev/en/latest/_autosummary/jax.random.normal.html 18/02/2025
 
 initial_params = {
-    'hidden': jax.random.normal(shape=[8, 32], key=jax.random.PRNGKey(0)),
+    'hidden': jax.random.normal(shape=[2, 32], key=jax.random.PRNGKey(0)),
     # - Initializes random weights for the hidden layer (8 inputs → 32 neurons).
     # - Uses PRNGKey(0) for reproducibility.
 
