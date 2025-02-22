@@ -19,8 +19,8 @@ LABELS = jax.nn.one_hot(RAW_TRAINING_DATA % 2, 2).astype(jnp.float32).reshape(NU
 #key can be state of the random generator
 
 initial_params = {
-    'hidden': jax.random.normal( shape = [8, 32], key = jax.random.PRNGKey( 0 ) ),
-    'output': jax.random.normal(shape = [32, 2], key = jax.random.PRNGKey( 1 ) )
+    'hidden': jax.random.normal(jax.random.PRNGKey( 0 ), shape = [8, 32]),
+    'output': jax.random.normal( key = jax.random.PRNGKey( 1 ) ,shape = [32, 2])
 }
 
 
