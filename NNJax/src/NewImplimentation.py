@@ -3,7 +3,6 @@ import jax.numpy as jnp
 import jax
 import numpy as np
 
-from classRewriteXOR import params
 
 BATCH_SIZE = 32
 NUM_TRAIN_STEPS = 1000
@@ -19,26 +18,28 @@ XOR_Labels = RAW_TRAINING_DATA[:, :, 0] ^ RAW_TRAINING_DATA[:, :, 1]  # compare 
 LABELS = jax.nn.one_hot(XOR_Labels, 2)
 
 
-def neuralNet(params, inputs)
-    hidden_layer=
-    output_layer=
+def neuralNet(parampsInput, paramsOutput, input_array):
+    hidden_layer= jax.nn.sigmoid(jnp.dot(input_array, parampsInput))
+    output_layer= jax.nn.sigmoid(jnp.dot(hidden_layer, paramsOutput))
     return output_layer
 
-def loss(params,input,labels)
-    predicted = neuralNet()
-    calc_loss= loss fuciton
+def loss(paramsInput , paramsOutput,input,labels):
+    predicted = neuralNet(paramsInput, paramsOutput, input)
+    calc_loss= optax.sigmoid_binary_cross_entropy(predicted, labels) #https://optax.readthedocs.io/en/latest/api/losses.html#optax.losses.sigmoid_binary_cross_entropy
     return calc_loss
 
-def fit(trainingdata,trianinglabels,  epochs, learning_rate))
+def fit(trainingdata,trianinglabels,  epochs, learning_rate)
 
 
-    params=
+    params_input=
 
+    params_output=
     optimizer =
 
     #training loop
     for epoch in range(epochs)
 
+        print("loss: ")
 
 
 
