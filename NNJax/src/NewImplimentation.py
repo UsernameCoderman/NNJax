@@ -2,8 +2,9 @@ import optax
 import jax.numpy as jnp
 import jax
 import numpy as np
+from keras.src.legacy.backend import update
 
-from classRewriteXOR import optimizer
+from classRewriteXOR import optimizer, params
 
 BATCH_SIZE = 32
 NUM_TRAIN_STEPS = 1000
@@ -29,6 +30,13 @@ def loss(params,input,labels):
     calc_loss= optax.sigmoid_binary_cross_entropy(predicted, labels) #https://optax.readthedocs.io/en/latest/api/losses.html#optax.losses.sigmoid_binary_cross_entropy
     return calc_loss
 
+def training_step(params, batch, labels, optimizer: optax.GradientTransformation, optimizerState):
+    loss_value, grad = jax.value_and_grad(loss)(params, batch, labels) # https://docs.jax.dev/en/latest/_autosummary/jax.value_and_grad.html
+    updateForParam, newOptimizerState = optimizer.update(grad,optimizerState, params) #https://optax.readthedocs.io/en/latest/api/optimizers.html#adam
+    new_parameters = optax.apply_updates(params,updateForParam) #https://optax.readthedocs.io/en/latest/api/apply_updates.html
+    return  new_parameters, newOptimizerState, loss_value
+
+
 def fit(trainingdata,traininglabels,  epochs, learning_rate):
 
     optimizer = optax.adam(learning_rate)
@@ -49,5 +57,3 @@ def fit(trainingdata,traininglabels,  epochs, learning_rate):
 
 
 
-def training_steps(params, batch, labels):
-   loss_value, grad = jax.value_and_grad(loss)(params, batch, labels) # https://docs.jax.dev/en/latest/_autosummary/jax.value_and_grad.html
