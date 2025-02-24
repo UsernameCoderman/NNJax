@@ -19,9 +19,9 @@ XOR_Labels = RAW_TRAINING_DATA[:, :, 0] ^ RAW_TRAINING_DATA[:, :, 1]  # compare 
 LABELS = jax.nn.one_hot(XOR_Labels, 2)
 
 
-def neuralNet(paramsHidden, paramsOutput, input_array):
-    hidden_layer= jax.nn.sigmoid(jnp.dot(input_array, paramsHidden["weight"]) + paramsHidden["bias"])
-    output_layer= jax.nn.sigmoid(jnp.dot(hidden_layer, paramsOutput["weight"]) + paramsOutput["bias"])
+def neuralNet(params, input_array):
+    hidden_layer= jax.nn.sigmoid(jnp.dot(input_array, params["weightHidden"]) + params["biasHidden"])
+    output_layer= jax.nn.sigmoid(jnp.dot(hidden_layer, params["weighOutput"]) + params["biasOutput"])
     return output_layer
 
 def loss(paramsInput , paramsOutput,input,labels):
@@ -29,28 +29,25 @@ def loss(paramsInput , paramsOutput,input,labels):
     calc_loss= optax.sigmoid_binary_cross_entropy(predicted, labels) #https://optax.readthedocs.io/en/latest/api/losses.html#optax.losses.sigmoid_binary_cross_entropy
     return calc_loss
 
-def fit(trainingdata,trianinglabels,  epochs, learning_rate)
+def fit(trainingdata,trianinglabels,  epochs, learning_rate):
 
     optimizer = optax.adam(learning_rate)
 
-    params_hidden = {
-        "weight" : 0.1,
-        "bias" : 0.1
+    params = {
+        "weightHidden" : 0.1,
+        "biasHidden" : 0.1,
+        "weighOutput" : 0.1,
+        "biasOutput" : 0.1
     }
 
-    params_output= {
-        "weight" : 0.1,
-        "bias" : 0.1
-    }
-
-    optimize_state = optimizer.init(params_hidden, params_output)
+    optimize_state = optimizer.init(params)
 
     #training loop
-    for epoch in range(epochs)
+    for epoch in range(epochs):
 
         print("loss: ")
 
 
 
-def training_steps()
+def training_steps():
     grad =
