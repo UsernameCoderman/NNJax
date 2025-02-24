@@ -21,22 +21,22 @@ LABELS = jax.nn.one_hot(XOR_Labels, 2)
 
 def neuralNet(params, input_array):
     hidden_layer= jax.nn.sigmoid(jnp.dot(input_array, params["weightHidden"]) + params["biasHidden"])
-    output_layer= jax.nn.sigmoid(jnp.dot(hidden_layer, params["weighOutput"]) + params["biasOutput"])
+    output_layer= jax.nn.sigmoid(jnp.dot(hidden_layer, params["weightOutput"]) + params["biasOutput"])
     return output_layer
 
-def loss(paramsInput , paramsOutput,input,labels):
-    predicted = neuralNet(paramsInput, paramsOutput, input)
+def loss(params,input,labels):
+    predicted = neuralNet(params, input)
     calc_loss= optax.sigmoid_binary_cross_entropy(predicted, labels) #https://optax.readthedocs.io/en/latest/api/losses.html#optax.losses.sigmoid_binary_cross_entropy
     return calc_loss
 
-def fit(trainingdata,trianinglabels,  epochs, learning_rate):
+def fit(trainingdata,traininglabels,  epochs, learning_rate):
 
     optimizer = optax.adam(learning_rate)
 
     params = {
         "weightHidden" : 0.1,
         "biasHidden" : 0.1,
-        "weighOutput" : 0.1,
+        "weightOutput" : 0.1,
         "biasOutput" : 0.1
     }
 
@@ -49,5 +49,5 @@ def fit(trainingdata,trianinglabels,  epochs, learning_rate):
 
 
 
-def training_steps():
-    grad =
+def training_steps(params, batch, labels):
+   loss_value, grad = jax.value_and_grad(loss)(params, batch, labels) # https://docs.jax.dev/en/latest/_autosummary/jax.value_and_grad.html
