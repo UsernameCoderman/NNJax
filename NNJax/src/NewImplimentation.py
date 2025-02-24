@@ -3,6 +3,7 @@ import jax.numpy as jnp
 import jax
 import numpy as np
 
+from classRewriteXOR import optimizer
 
 BATCH_SIZE = 32
 NUM_TRAIN_STEPS = 1000
@@ -18,9 +19,9 @@ XOR_Labels = RAW_TRAINING_DATA[:, :, 0] ^ RAW_TRAINING_DATA[:, :, 1]  # compare 
 LABELS = jax.nn.one_hot(XOR_Labels, 2)
 
 
-def neuralNet(parampsInput, paramsOutput, input_array):
-    hidden_layer= jax.nn.sigmoid(jnp.dot(input_array, parampsInput))
-    output_layer= jax.nn.sigmoid(jnp.dot(hidden_layer, paramsOutput))
+def neuralNet(paramsHidden, paramsOutput, input_array):
+    hidden_layer= jax.nn.sigmoid(jnp.dot(input_array, paramsHidden["weight"]) + paramsHidden["bias"])
+    output_layer= jax.nn.sigmoid(jnp.dot(hidden_layer, paramsOutput["weight"]) + paramsOutput["bias"])
     return output_layer
 
 def loss(paramsInput , paramsOutput,input,labels):
@@ -30,11 +31,19 @@ def loss(paramsInput , paramsOutput,input,labels):
 
 def fit(trainingdata,trianinglabels,  epochs, learning_rate)
 
+    optimizer = optax.adam(learning_rate)
 
-    params_input=
+    params_hidden = {
+        "weight" : 0.1,
+        "bias" : 0.1
+    }
 
-    params_output=
-    optimizer =
+    params_output= {
+        "weight" : 0.1,
+        "bias" : 0.1
+    }
+
+    optimize_state = optimizer.init(params_hidden, params_output)
 
     #training loop
     for epoch in range(epochs)
@@ -44,3 +53,4 @@ def fit(trainingdata,trianinglabels,  epochs, learning_rate)
 
 
 def training_steps()
+    grad =
