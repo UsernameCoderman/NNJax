@@ -3,6 +3,7 @@ import jax.numpy as jnp
 import jax
 import numpy as np
 from keras.src.legacy.backend import update
+from tensorflow.python.ops.gen_batch_ops import batch
 
 from classRewriteXOR import optimizer, params
 
@@ -52,6 +53,9 @@ def fit(trainingdata,traininglabels,  epochs, learning_rate):
 
     #training loop
     for epoch in range(epochs):
+
+        for x in zip()
+        params, optimize_state, loss_value = training_step(params, batch, traininglabels, optimizer, optimize_state)
 
         print("loss: ")
 
