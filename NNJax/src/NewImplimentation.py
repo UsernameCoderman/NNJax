@@ -29,7 +29,7 @@ def neuralNet(params, input_array):
 def loss(params,input,labels):
     predicted = neuralNet(params, input)
     calc_loss= optax.sigmoid_binary_cross_entropy(predicted, labels) #https://optax.readthedocs.io/en/latest/api/losses.html#optax.losses.sigmoid_binary_cross_entropy
-    return calc_loss
+    return jnp.mean(calc_loss)
 
 def training_step(params, batch, labels, optimizer: optax.GradientTransformation, optimizerState):
     loss_value, grad = jax.value_and_grad(loss)(params, batch, labels) # https://docs.jax.dev/en/latest/_autosummary/jax.value_and_grad.html
@@ -53,11 +53,10 @@ def fit(trainingdata,traininglabels,  epochs, learning_rate):
 
     #training loop
     for epoch in range(epochs):
+        for batch, labels in zip(trainingdata, traininglabels): # https://www.w3schools.com/python/ref_func_zip.asp
+            params, optimize_state, loss_value = training_step(params, batch, labels, optimizer, optimize_state)
 
-        for x in zip()
-        params, optimize_state, loss_value = training_step(params, batch, traininglabels, optimizer, optimize_state)
-
-        print("loss: ")
+        print(f"Epoch {epoch+1}, Loss: {loss_value.item():.4f}")
 
 
 
