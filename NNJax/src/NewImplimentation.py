@@ -4,11 +4,11 @@ import jax
 import numpy as np
 from jax import tree_util
 
-BATCH_SIZE = 32
+BATCH_SIZE = 1
 NUM_TRAIN_STEPS = 1000
 # https://numpy.org/doc/2.1/reference/random/generated/numpy.random.randint.html
 TRAINING_DATA = jnp.array(np.random.randint(2, size=(NUM_TRAIN_STEPS, BATCH_SIZE, 2)))
-print(TRAINING_DATA)
+
 # 16/02/25 https://numpy.org/doc/2.2/reference/generated/numpy.bitwise_xor.html
 XOR_LABELS = TRAINING_DATA[:, :, 0] ^ TRAINING_DATA[:, :, 1]  # compare first with second column, deconstructs
 # https://docs.jax.dev/en/latest/_autosummary/jax.nn.one_hot.html
@@ -19,14 +19,12 @@ def forward_pass(params, input_array):
     output_layer = jax.nn.sigmoid(jnp.dot(hidden_layer, params["weight_output"]) + params["bias_output"])
     return output_layer
 
-
 def loss(params, inputs, labels):
     predicted = forward_pass(params, inputs)
     loss_value = optax.sigmoid_binary_cross_entropy(predicted, labels)  # https://optax.readthedocs.io/en/latest/api/losses.html#optax.losses.sigmoid_binary_cross_entropy
     return jnp.mean(loss_value)
 
-
-def train_model(training_data, labels, epochs=10, learning_rate=1.0):
+def train_model(training_data, labels, traning_steps, epochs=10, learning_rate=1.0):
     params = { # https://docs.jax.dev/en/latest/_autosummary/jax.numpy.array.html
         "weight_hidden": jnp.array(np.random.randn(2, 2) * 0.1, dtype=jnp.float32),   # https://numpy.org/doc/2.1/reference/random/generated/numpy.random.rand.html
         "bias_hidden": jnp.array(np.zeros(2), dtype=jnp.float32),
@@ -46,9 +44,11 @@ def train_model(training_data, labels, epochs=10, learning_rate=1.0):
 
     # training loop
     for epoch in range(epochs):
-        for batch, labels in zip(training_data, labels):  # https://www.w3schools.com/python/ref_func_zip.asp
+        for i in range(traning_steps):
+            batch = training_data[i]
+            labels = LABELS[i]
             params, opt_state, loss_value = training_step(params, batch, labels, opt_state)
         print(f"Epoch {epoch + 1}, Loss: {loss_value.item():.4f}")
 
 
-train_model(TRAINING_DATA, LABELS)
+train_model(TRAINING_DATA, LABELS, NUM_TRAIN_STEPS)
