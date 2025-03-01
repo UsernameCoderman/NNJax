@@ -2,10 +2,6 @@ import optax
 import jax.numpy as jnp
 import jax
 import numpy as np
-from keras.src.legacy.backend import update
-from tensorflow.python.ops.gen_batch_ops import batch
-
-from classRewriteXOR import optimizer, params
 
 BATCH_SIZE = 32
 NUM_TRAIN_STEPS = 1000
@@ -31,32 +27,38 @@ def loss(params,input,labels):
     calc_loss= optax.sigmoid_binary_cross_entropy(predicted, labels) #https://optax.readthedocs.io/en/latest/api/losses.html#optax.losses.sigmoid_binary_cross_entropy
     return jnp.mean(calc_loss)
 
-def training_step(params, batch, labels, optimizer: optax.GradientTransformation, optimizerState):
-    loss_value, grad = jax.value_and_grad(loss)(params, batch, labels) # https://docs.jax.dev/en/latest/_autosummary/jax.value_and_grad.html
-    updateForParam, newOptimizerState = optimizer.update(grad,optimizerState, params) #https://optax.readthedocs.io/en/latest/api/optimizers.html#adam
-    new_parameters = optax.apply_updates(params,updateForParam) #https://optax.readthedocs.io/en/latest/api/apply_updates.html
-    return  new_parameters, newOptimizerState, loss_value
 
 
-def fit(trainingdata,traininglabels,  epochs, learning_rate):
+
+def fit(trainingdata,traininglabels,epochs=10, learning_rate=1.0):
 
     optimizer = optax.adam(learning_rate)
 
+    # https://docs.jax.dev/en/latest/_autosummary/jax.numpy.array.html
+    #https://numpy.org/doc/2.1/reference/random/generated/numpy.random.rand.html
+    #https://numpy.org/devdocs/reference/generated/numpy.zeros.html
     params = {
-        "weightHidden" : 0.1,
-        "biasHidden" : 0.1,
-        "weightOutput" : 0.1,
-        "biasOutput" : 0.1
+        "weightHidden": jnp.array(np.random.randn(2, 2) * 0.1, dtype=jnp.float32),
+        "biasHidden": jnp.array(np.zeros(2), dtype=jnp.float32),
+        "weightOutput": jnp.array(np.random.randn(2, 2) * 0.1, dtype=jnp.float32),
+        "biasOutput": jnp.array(np.zeros(2), dtype=jnp.float32),
     }
 
-    optimize_state = optimizer.init(params)
+    from jax import tree_util  # ✅ Import tree_util
 
-    #training loop
+    optimize_state = optimizer.init(tree_util.tree_map(jnp.array, params))
+
+    @jax.jit
+    def training_step(params, batch, labels, optimizerState):
+        loss_value, grad = jax.value_and_grad(loss)(params, batch, labels) # https://docs.jax.dev/en/latest/_autosummary/jax.value_and_grad.html
+        updateForParam, newOptimizerState = optimizer.update(grad,optimizerState, params) #https://optax.readthedocs.io/en/latest/api/optimizers.html#adam
+        new_parameters = optax.apply_updates(params,updateForParam) #https://optax.readthedocs.io/en/latest/api/apply_updates.html
+        return  new_parameters, newOptimizerState, loss_value
+#training loop
     for epoch in range(epochs):
         for batch, labels in zip(trainingdata, traininglabels): # https://www.w3schools.com/python/ref_func_zip.asp
-            params, optimize_state, loss_value = training_step(params, batch, labels, optimizer, optimize_state)
-
+            params, optimize_state, loss_value = training_step(params, batch, labels, optimize_state)
         print(f"Epoch {epoch+1}, Loss: {loss_value.item():.4f}")
 
 
-
+fit(RAW_TRAINING_DATA, LABELS)
