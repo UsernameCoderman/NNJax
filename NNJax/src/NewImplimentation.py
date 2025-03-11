@@ -4,37 +4,49 @@ import jax
 import numpy as np
 from jax import tree_util
 
-BATCH_SIZE = 1
-NUM_TRAIN_STEPS = 1000
-# https://numpy.org/doc/2.1/reference/random/generated/numpy.random.randint.html
-TRAINING_DATA = jnp.array(np.random.randint(2, size=(NUM_TRAIN_STEPS, BATCH_SIZE, 2)))
+BATCH_SIZE = 1000
+NUM_OF_BATCHES = 32
+#Generates random pairs of 1 and 0 into an array based on batch size and number of batches, and has 2 possible values
+TRAINING_DATA = jnp.array(np.random.randint(2, size=(NUM_OF_BATCHES, BATCH_SIZE, 2)))
 
-# 16/02/25 https://numpy.org/doc/2.2/reference/generated/numpy.bitwise_xor.html
+#Generates the correct labels using native XOR funtionality
 XOR_LABELS = TRAINING_DATA[:, :, 0] ^ TRAINING_DATA[:, :, 1]  # compare first with second column, deconstructs
-# https://docs.jax.dev/en/latest/_autosummary/jax.nn.one_hot.html
+
+#One hot encodes 1 to [1,0] and 0 to [0,1]
 LABELS = jax.nn.one_hot(XOR_LABELS, 2)
 
+#print statment to visualise the data and the labels
+for i in range(len(TRAINING_DATA[1])):
+    print(f"DATA: {TRAINING_DATA[1][i]} LABEL: {LABELS[1][i]}")
+
+#neural network with activation functions, for sigmoid
 def forward_pass(params, input_array):
     hidden_layer = jax.nn.sigmoid(jnp.dot(input_array, params["weight_hidden"]) + params["bias_hidden"])
-    output_layer = jax.nn.sigmoid(jnp.dot(hidden_layer, params["weight_output"]) + params["bias_output"])
+    output_layer = jnp.dot(hidden_layer, params["weight_output"]) + params["bias_output"]
     return output_layer
 
+#loss function, uses cross entropy to calulcate loss
 def loss(params, inputs, labels):
     predicted = forward_pass(params, inputs)
     loss_value = optax.sigmoid_binary_cross_entropy(predicted, labels)  # https://optax.readthedocs.io/en/latest/api/losses.html#optax.losses.sigmoid_binary_cross_entropy
     return jnp.mean(loss_value)
 
-def train_model(training_data, labels, traning_steps, epochs=10, learning_rate=1.0):
+#training function,
+def train_model(training_data, labels, traning_steps, epochs=10, learning_rate=0.1):
+    neurons = int(round(BATCH_SIZE/10,0))
+
     params = { # https://docs.jax.dev/en/latest/_autosummary/jax.numpy.array.html
-        "weight_hidden": jnp.array(np.random.randn(2, 2) * 0.1, dtype=jnp.float32),   # https://numpy.org/doc/2.1/reference/random/generated/numpy.random.rand.html
-        "bias_hidden": jnp.array(np.zeros(2), dtype=jnp.float32),
-        "weight_output": jnp.array(np.random.randn(2, 2) * 0.1, dtype=jnp.float32),
+        "weight_hidden": jnp.array(np.random.randn(2, neurons) * 0.1, dtype=jnp.float32),   # https://numpy.org/doc/2.1/reference/random/generated/numpy.random.rand.html
+        "bias_hidden": jnp.array(np.zeros(neurons), dtype=jnp.float32),
+        "weight_output": jnp.array(np.random.randn(neurons, 2) * 0.1, dtype=jnp.float32),
         "bias_output": jnp.array(np.zeros(2), dtype=jnp.float32),# https://numpy.org/devdocs/reference/generated/numpy.zeros.html
     }
 
+    print(f"{params}")
     optimizer = optax.adam(learning_rate)
     opt_state = optimizer.init(tree_util.tree_map(jnp.array, params)) # https://docs.jax.dev/en/latest/working-with-pytrees.html
 
+    #step function
     @jax.jit
     def training_step(params, batch, labels, opt_state):
         loss_value, grad = jax.value_and_grad(loss)(params, batch, labels)  # https://docs.jax.dev/en/latest/_autosummary/jax.value_and_grad.html
@@ -46,9 +58,9 @@ def train_model(training_data, labels, traning_steps, epochs=10, learning_rate=1
     for epoch in range(epochs):
         for i in range(traning_steps):
             batch = training_data[i]
-            labels = LABELS[i]
-            params, opt_state, loss_value = training_step(params, batch, labels, opt_state)
+            current_labels = labels[i]
+            params, opt_state, loss_value = training_step(params, batch, current_labels, opt_state)
         print(f"Epoch {epoch + 1}, Loss: {loss_value.item():.4f}")
 
 
-train_model(TRAINING_DATA, LABELS, NUM_TRAIN_STEPS)
+train_model(TRAINING_DATA, LABELS, NUM_OF_BATCHES)
