@@ -3,12 +3,21 @@ import jax.numpy as jnp
 import jax
 import numpy as np
 from jax import tree_util
+import json
 
-BATCH_SIZE = 1000
-NUM_OF_BATCHES = 32
+
+BATCH_SIZE = 10000
+NUM_OF_BATCHES = 50
 #Generates random pairs of 1 and 0 into an array based on batch size and number of batches, and has 2 possible values
 TRAINING_DATA = jnp.array(np.random.randint(2, size=(NUM_OF_BATCHES, BATCH_SIZE, 2)))
 
+filename = "datasetB10kS50.json"
+
+# Convert JAX array to a list and save as JSON
+with open(filename, "w") as file:
+    json.dump(TRAINING_DATA.tolist(), file)
+
+print(f"File '{filename}' has been created successfully.")
 #Generates the correct labels using native XOR funtionality
 XOR_LABELS = TRAINING_DATA[:, :, 0] ^ TRAINING_DATA[:, :, 1]  # compare first with second column, deconstructs
 
