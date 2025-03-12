@@ -33,6 +33,8 @@ def loss(params, inputs, labels):
 
 #training function,
 def train_model(training_data, labels, traning_steps, epochs=10, learning_rate=0.1):
+
+
     neurons = int(round(BATCH_SIZE/10,0))
 
     params = { # https://docs.jax.dev/en/latest/_autosummary/jax.numpy.array.html

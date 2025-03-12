@@ -25,7 +25,7 @@ initial_params = {
 
 def net(inputX: jnp.ndarray, paramWeights: optax.Params) -> jnp.ndarray:
     inputX = jnp.dot(inputX, paramWeights['hidden'])  #  https://docs.jax.dev/en/latest/_autosummary/jax.numpy.dot.html 18/02/
-    inputX = jax.nn.sigmoid(inputX)  # https://docs.jax.dev/en/latest/_autosummary/jax.nn.sigmoid.html
+    inputX = jax.nn.relu(inputX)  # https://docs.jax.dev/en/latest/_autosummary/jax.nn.sigmoid.html
     inputX = jnp.dot(inputX, paramWeights['output'])  #
     return inputX
 
