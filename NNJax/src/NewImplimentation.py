@@ -8,16 +8,15 @@ import json
 
 BATCH_SIZE = 10000
 NUM_OF_BATCHES = 50
-#Generates random pairs of 1 and 0 into an array based on batch size and number of batches, and has 2 possible values
-TRAINING_DATA = jnp.array(np.random.randint(2, size=(NUM_OF_BATCHES, BATCH_SIZE, 2)))
+BITS=2
 
-filename = "datasetB10kS50.json"
+filename = "2Bit10kBatch50Samples.json"
+with open(filename, "r") as file:
+    data = json.load(file)
 
-# Convert JAX array to a list and save as JSON
-with open(filename, "w") as file:
-    json.dump(TRAINING_DATA.tolist(), file)
+TRAINING_DATA = jnp.array(data)
 
-print(f"File '{filename}' has been created successfully.")
+
 #Generates the correct labels using native XOR funtionality
 XOR_LABELS = TRAINING_DATA[:, :, 0] ^ TRAINING_DATA[:, :, 1]  # compare first with second column, deconstructs
 
@@ -25,9 +24,9 @@ XOR_LABELS = TRAINING_DATA[:, :, 0] ^ TRAINING_DATA[:, :, 1]  # compare first wi
 LABELS = jax.nn.one_hot(XOR_LABELS, 2)
 
 #print statment to visualise the data and the labels
-for i in range(len(TRAINING_DATA[1])):
-    print(f"DATA: {TRAINING_DATA[1][i]} LABEL: {LABELS[1][i]}")
-
+#for i in range(len(TRAINING_DATA[1])):
+   # print(f"DATA: {TRAINING_DATA[1][i]} LABEL: {LABELS[1][i]}")
+#
 #neural network with activation functions, for sigmoid
 def forward_pass(params, input_array):
     hidden_layer = jax.nn.sigmoid(jnp.dot(input_array, params["weight_hidden"]) + params["bias_hidden"])
@@ -53,7 +52,7 @@ def train_model(training_data, labels, traning_steps, epochs=10, learning_rate=0
         "bias_output": jnp.array(np.zeros(2), dtype=jnp.float32),# https://numpy.org/devdocs/reference/generated/numpy.zeros.html
     }
 
-    print(f"{params}")
+    #print(f"{params}")
     optimizer = optax.adam(learning_rate)
     opt_state = optimizer.init(tree_util.tree_map(jnp.array, params)) # https://docs.jax.dev/en/latest/working-with-pytrees.html
 
