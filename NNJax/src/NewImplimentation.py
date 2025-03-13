@@ -5,18 +5,18 @@ import numpy as np
 from jax import tree_util
 import json
 
-BATCH_SIZE = 10000
-NUM_OF_BATCHES = 50
-BITS = 2
+BATCH_SIZE = 50
+NUM_OF_BATCHES = 10
+BITS = 5
 K_FOLD = 5
 
-filename = "2Bit10kBatch50Samples.json"
+filename = "5Bit20Batches500Samples.json"
 with open(filename, "r") as file:
     data = json.load(file)
 
 TRAINING_DATA = jnp.array(data)
 
-# Generates the correct labels using native XOR funtionality
+# Generates the correct labels by checking if the sum is odd or even
 XOR_LABELS = (jnp.sum(TRAINING_DATA, axis=-1) % 2 != 0).astype(jnp.int32)
 
 # One hot encodes 1 to [1,0] and 0 to [0,1]
@@ -47,7 +47,7 @@ def train_model(training_data, labels, traning_steps, epochs=10, learning_rate=0
     neurons = 9  # int(round(BATCH_SIZE/10,0))
 
     params = {  # https://docs.jax.dev/en/latest/_autosummary/jax.numpy.array.html
-        "weight_hidden": jnp.array(np.random.randn(2, neurons) * 0.1, dtype=jnp.float32),
+        "weight_hidden": jnp.array(np.random.randn(BITS, neurons) * 0.1, dtype=jnp.float32),
         # https://numpy.org/doc/2.1/reference/random/generated/numpy.random.rand.html
         "bias_hidden": jnp.array(np.zeros(neurons), dtype=jnp.float32),
         "weight_output": jnp.array(np.random.randn(neurons, 2) * 0.1, dtype=jnp.float32),
@@ -84,4 +84,4 @@ def train_model(training_data, labels, traning_steps, epochs=10, learning_rate=0
 
 
 
-#train_model(TRAINING_DATA, LABELS, NUM_OF_BATCHES)
+train_model(TRAINING_DATA, LABELS, NUM_OF_BATCHES)
