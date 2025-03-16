@@ -4,16 +4,24 @@ import jax
 import numpy as np
 from jax import tree_util
 import json
+import re
 
-BATCH_SIZE = 50
-NUM_OF_BATCHES = 10
-BITS = 5
 K_FOLD = 5
+#Filename for dataset
+filename = "3Bit89Batches1000SamplesPerBatch.json"
 
-filename = "5Bit20Batches500Samples.json"
+
+#Find the correct setup based on file name
+findSetUp = re.search(r'(\d+)Bit(\d+)Batches(\d+)SamplesPerBatch', filename)
+if findSetUp:
+    BITS, NUM_OF_BATCHES, BATCH_SIZE = map(int, findSetUp.groups())
+    print("BITS:", BITS)
+    print("NUM_OF_BATCHES:", NUM_OF_BATCHES)
+    print("BATCH_SIZE:", BATCH_SIZE)
+
+#Get data from file
 with open(filename, "r") as file:
     data = json.load(file)
-
 TRAINING_DATA = jnp.array(data)
 
 # Generates the correct labels by checking if the sum is odd or even
@@ -78,10 +86,6 @@ def train_model(training_data, labels, traning_steps, epochs=10, learning_rate=0
             current_labels = labels[i]
             params, opt_state, loss_value = training_step(params, batch, current_labels, opt_state)
         print(f"Epoch {epoch + 1}, Loss: {loss_value.item():.4f}")
-
-
-
-
 
 
 train_model(TRAINING_DATA, LABELS, NUM_OF_BATCHES)
