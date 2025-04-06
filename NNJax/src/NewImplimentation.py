@@ -6,10 +6,11 @@ from jax import tree_util
 import json
 import re
 
+
 K_FOLD = 5
-NEURONS = 9
+NEURONS = 16
 #Filename for dataset
-filename = "3Bit89Batches1000SamplesPerBatch.json"
+filename = "8Bit100Batches1000SamplesPerBatch.json"
 
 
 # Extract dataset properties from filename
@@ -37,20 +38,20 @@ LABELS = jax.nn.one_hot(XOR_LABELS, 2)
 #
 # neural network with activation functions, for sigmoid
 def forward_pass(params, input_array):
-    hidden_layer = jax.nn.sigmoid(jnp.dot(input_array, params["weight_hidden"]) + params["bias_hidden"])
+    hidden_layer = jax.nn.relu(jnp.dot(input_array, params["weight_hidden"]) + params["bias_hidden"])
     output_layer = jnp.dot(hidden_layer, params["weight_output"]) + params["bias_output"]
     return output_layer
 
 
 # loss function, uses cross entropy to calulcate loss
 def loss(params, inputs, labels):
-    predicted = forward_pass(params, inputs)
+    predicted = jax.nn.sigmoid(forward_pass(params, inputs))
     loss_value = optax.sigmoid_binary_cross_entropy(predicted, labels)  # https://optax.readthedocs.io/en/latest/api/losses.html#optax.losses.sigmoid_binary_cross_entropy
     return jnp.mean(loss_value)
 
 
 # training function,
-def train_model(training_data, labels, batch_size, traning_steps, epochs=10, learning_rate=0.1):
+def train_model(training_data, labels, batch_size, traning_steps, epochs=10, learning_rate=0.8):
 
     params = {  # https://docs.jax.dev/en/latest/_autosummary/jax.numpy.array.html
         "weight_hidden": jnp.array(np.random.randn(BITS, NEURONS) * 0.1, dtype=jnp.float32),
